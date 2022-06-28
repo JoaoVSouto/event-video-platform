@@ -1,11 +1,55 @@
+import '@vime/core/themes/default.css';
+
 import {
   CaretRight,
   DiscordLogo,
   FileArrowDown,
   Lightning,
 } from 'phosphor-react';
+import { DefaultUi, Player, Youtube } from '@vime/react';
+import { gql, useQuery } from '@apollo/client';
 
-export function Video() {
+type VideoProps = {
+  lessonSlug: string;
+};
+
+type GetLessonBySlugResponse = {
+  lesson: {
+    title: string;
+    videoId: string;
+    description: string;
+    teacher: {
+      avatarURL: string;
+      name: string;
+      bio: string;
+    };
+  };
+};
+
+const GET_LESSON_BY_SLUG_QUERY = gql`
+  query GetLessonBySlug($slug: String) {
+    lesson(where: { slug: $slug }) {
+      title
+      videoId
+      description
+      teacher {
+        avatarURL
+        name
+        bio
+      }
+    }
+  }
+`;
+
+export function Video({ lessonSlug }: VideoProps) {
+  const { data } = useQuery<GetLessonBySlugResponse>(GET_LESSON_BY_SLUG_QUERY, {
+    variables: { slug: lessonSlug },
+  });
+
+  if (!data) {
+    return <div className="flex-1" />;
+  }
+
   return (
     <div className="flex-1">
       <div className={['bg-black', 'flex', 'justify-center'].join(' ')}>
@@ -17,23 +61,24 @@ export function Video() {
             'max-h-[60vh]',
             'aspect-video',
           ].join(' ')}
-        ></div>
+        >
+          <Player>
+            <Youtube videoId={data.lesson.videoId} />
+            <DefaultUi />
+          </Player>
+        </div>
       </div>
 
       <div className={['p-8', 'max-w-[1100px]', 'mx-auto'].join(' ')}>
         <div className={['flex', 'items-start', 'gap-16'].join(' ')}>
           <div className="flex-1">
             <h1 className={['text-2xl', 'font-bold'].join(' ')}>
-              Aula 01 - Abertura do Ignite Lab
+              {data.lesson.title}
             </h1>
             <p
               className={['mt-4', 'text-gray-200', 'leading-relaxed'].join(' ')}
             >
-              Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cum
-              doloribus ea veniam magnam, voluptate iste vel dolores
-              exercitationem nihil dolore eaque ut recusandae. Expedita
-              quibusdam at officia unde tempora necessitatibus animi quod nisi,
-              voluptatibus sit! Officia, molestiae iure. Quaerat, dolorum?
+              {data.lesson.description}
             </p>
 
             <div
@@ -48,20 +93,20 @@ export function Video() {
                   'border-2',
                   'border-blue-500',
                 ].join(' ')}
-                src="https://github.com/joaovsouto.png"
-                alt="João Vítor"
+                src={data.lesson.teacher.avatarURL}
+                alt={data.lesson.teacher.name}
               />
 
               <div className="leading-relaxed">
                 <strong
                   className={['font-bold', 'text-2xl', 'block'].join(' ')}
                 >
-                  João Vítor
+                  {data.lesson.teacher.name}
                 </strong>
                 <span
                   className={['text-gray-200', 'text-sm', 'block'].join(' ')}
                 >
-                  Front-end developer
+                  {data.lesson.teacher.bio}
                 </span>
               </div>
             </div>
