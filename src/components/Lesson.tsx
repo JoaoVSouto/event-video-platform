@@ -1,7 +1,7 @@
 import { CheckCircle, Lock } from 'phosphor-react';
+import { Link, useParams } from 'react-router-dom';
 import { format, isPast } from 'date-fns';
 
-import { Link } from 'react-router-dom';
 import ptBR from 'date-fns/locale/pt-BR';
 
 export type LessonTypes = 'live' | 'class';
@@ -11,6 +11,7 @@ type LessonProps = {
   slug: string;
   availableAt: Date;
   type: LessonTypes;
+  isActive: boolean;
 };
 
 function getLessonType(type: LessonTypes) {
@@ -23,7 +24,13 @@ function getLessonType(type: LessonTypes) {
   }
 }
 
-export function Lesson({ availableAt, slug, title, type }: LessonProps) {
+export function Lesson({
+  availableAt,
+  slug,
+  title,
+  type,
+  isActive,
+}: LessonProps) {
   const isLessonAvailable = isPast(availableAt);
   const availableDateFormatted = format(
     availableAt,
@@ -43,6 +50,7 @@ export function Lesson({ availableAt, slug, title, type }: LessonProps) {
           'p-4',
           'mt-2',
           'group-hover:border-green-500',
+          isActive ? 'bg-green-500' : '',
         ].join(' ')}
       >
         <header
@@ -52,11 +60,11 @@ export function Lesson({ availableAt, slug, title, type }: LessonProps) {
             <span
               className={[
                 'text-sm',
-                'text-blue-500',
                 'font-medium',
                 'flex',
                 'items-center',
                 'gap-2',
+                isActive ? 'text-white' : 'text-blue-500',
               ].join(' ')}
             >
               <CheckCircle size={20} />
@@ -86,15 +94,21 @@ export function Lesson({ availableAt, slug, title, type }: LessonProps) {
               'py-0.5',
               'text-white',
               'border',
-              'border-green-300',
               'font-bold',
+              isActive ? 'border-white' : 'border-green-300',
             ].join(' ')}
           >
             {getLessonType(type)}
           </span>
         </header>
 
-        <strong className={['text-gray-200', 'mt-5', 'block'].join(' ')}>
+        <strong
+          className={[
+            'mt-5',
+            'block',
+            isActive ? 'text-white' : 'text-gray-200',
+          ].join(' ')}
+        >
           {title}
         </strong>
       </div>
